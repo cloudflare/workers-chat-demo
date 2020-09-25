@@ -28,3 +28,9 @@ If you are in the Durable Objects beta, you can deploy the app by running:
     ./publish.sh
 
 This script will prompt you for necessary credentials and deploy the app to your account under the name `edge-chat-demo`.
+
+## What are the dependencies?
+
+This demo code does not have any dependencies, aside from Cloudflare Workers (for the server side, `chat.mjs`) and a modern web browser (for the client side, `chat.html`).
+
+The upload script, `publish.sh`, needs `bash`, `curl`, and `jq`. That script will go away as soon as we add Durable Objects support to [Wrangler](https://github.com/cloudflare/wrangler), the official Workers CLI.
