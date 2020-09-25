@@ -24,19 +24,17 @@ fi
 if [ -e credentials.conf ]; then
   source credentials.conf
 else
-  echo -n "Cloudflare account ID (32 hex digits): "
+  echo -n "Please create a Cloudflare Auth Token with the 'Edit Cloudflare Workers' template."
+  echo -n "Auth Token: "
+  read AUTH_TOKEN
+  echo -n "Cloudflare account ID (32 hex digits, found on the right sidebar of the Workers dashboard): "
   read ACCOUNT_ID
-  echo -n "Cloudflare account email: "
-  read AUTH_EMAIL
-  echo -n "Cloudflare auth key: "
-  read AUTH_KEY
 
   SCRIPT_NAME=edge-chat-demo
 
   cat > credentials.conf << __EOF__
 ACCOUNT_ID=$ACCOUNT_ID
-AUTH_EMAIL=$AUTH_EMAIL
-AUTH_KEY=$AUTH_KEY
+AUTH_TOKEN=$AUTH_TOKEN
 SCRIPT_NAME=$SCRIPT_NAME
 __EOF__
 
@@ -49,7 +47,7 @@ fi
 # JSON response for errors. In case of errors, exit. Otherwise, write just the result part to
 # stdout.
 curl_api() {
-  RESULT=$(curl -s -H "X-Auth-Email: $AUTH_EMAIL" -H "X-Auth-Key: $AUTH_KEY" "$@")
+  RESULT=$(curl -s -H "Authorization: Bearer $AUTH_TOKEN" "$@")
   if [ $(echo "$RESULT" | jq .success) = true ]; then
     echo "$RESULT" | jq .result
     return 0
@@ -62,9 +60,11 @@ curl_api() {
 
 # Let's verify the credentials work by listing Workers scripts and Durable Object classes. If
 # either of these requests error then we're certainly not going to be able to continue.
-echo "Checking credentials..."
+echo "Checking if credentials can access Workers..."
 curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts >/dev/null
+echo "Checking if credentials can access Durable Objects..."
 curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/durable_objects/classes >/dev/null
+echo "Credentials OK! Publishing..."
 
 # upload_script uploads our Worker code with the appropriate metadata.
 upload_script() {
