@@ -34,6 +34,9 @@ body {
 #chatlog span.username {
   font-weight: bold;
 }
+#spacer {
+  height: 100vh;
+}
 
 #roster {
   font-weight: bold;
@@ -185,7 +188,9 @@ p:last-of-type {
       <button id="go-private">Create a Private Room &raquo;</button>
     </div>
     <div id="chatroom">
-      <div id="chatlog"></div>
+      <div id="chatlog">
+        <div id="spacer"></div>
+      </div>
       <div id="roster"></div>
       <input id="chat-input">
     </div>
@@ -286,10 +291,7 @@ function startChat() {
   // Normalize the room name a bit.
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
 
-  if (roomname.match(/^[0-9a-f]{64}$/)) {
-    addChatMessage(null,
-        "* This is a private room. You can invite someone to the room by sending them the URL.");
-  } else if (roomname.length > 32) {
+  if (roomname.length > 32 && !roomname.match(/^[0-9a-f]{64}$/)) {
     addChatMessage("ERROR", "Invalid room name.");
     return;
   }
@@ -344,7 +346,7 @@ function startChat() {
 let lastSeenTimestamp = 0;
 
 function join() {
-  let ws = new WebSocket("wss://" + window.location.host + "/api/room/" + roomname + "/websocket");
+  let ws = new WebSocket("wss://edge-chat-demo.cloudflareworkers.com/api/room/" + roomname + "/websocket");
   let rejoined = false;
   let startTime = Date.now();
 
@@ -392,6 +394,20 @@ function join() {
           roster.removeChild(child);
           break;
         }
+      }
+    } else if (data.ready) {
+      // All pre-join messages have been delivered.
+      addChatMessage(null, "* This is a demo of Cloudflare Workers Durable Objects.");
+      addChatMessage(null,
+          "* WARNING: Participants in this chat are random people on the internet. " +
+          "Names are not authenticated; anyone can pretend to be anyone. The people " +
+          "you are chatting with are NOT Cloudflare employees. Chat history is saved.");
+      if (roomname.length == 64) {
+        addChatMessage(null,
+            "* This is a private room. You can invite someone to the room by sending them the URL.");
+      } else {
+        addChatMessage(null,
+            "* Welcome to #" + roomname + ". Say hi!");
       }
     } else {
       // A regular chat message.

@@ -341,6 +341,8 @@ export class ChatRoom {
           // Broadcast to all other connections that this user has joined.
           this.broadcast({joined: session.name});
 
+          webSocket.send(JSON.stringify({ready: true}));
+
           // Note that we've now received the user info message.
           receivedUserInfo = true;
 
