@@ -397,7 +397,9 @@ function join() {
       }
     } else if (data.ready) {
       // All pre-join messages have been delivered.
-      addChatMessage(null, "* This is a demo of Cloudflare Workers Durable Objects.");
+      addChatMessage(null,
+          "* This is a demo app built with Cloudflare Workers Durable Objects. The source code " +
+          "can be found at: https://github.com/cloudflare/workers-chat-demo");
       addChatMessage(null,
           "* WARNING: Participants in this chat are random people on the internet. " +
           "Names are not authenticated; anyone can pretend to be anyone. The people " +
