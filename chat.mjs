@@ -88,30 +88,29 @@ async function handleErrors(request, func) {
 // adding other handlers for other types of events over time.
 export default {
   async fetch(request, env) {
-    return await handleErrors(request, () => fetchImpl(request, env))
+    return await handleErrors(request, async () => {
+      // We have received at HTTP request! Parse the URL and route the request.
+
+      let url = new URL(request.url);
+      let path = url.pathname.slice(1).split('/');
+
+      if (!path[0]) {
+        // Serve our HTML at the root path.
+        return new Response(HTML, {headers: {"Content-Type": "text/html;charset=UTF-8"}});
+      }
+
+      switch (path[0]) {
+        case "api":
+          // This is a request for `/api/...`, call the API handler.
+          return handleApiRequest(path.slice(1), request, env);
+
+        default:
+          return new Response("Not found", {status: 404});
+      }
+    });
   }
 }
 
-async function fetchImpl(request, env) {
-  // We have received at HTTP request! Parse the URL and route the request.
-
-  let url = new URL(request.url);
-  let path = url.pathname.slice(1).split('/');
-
-  if (!path[0]) {
-    // Serve our HTML at the root path.
-    return new Response(HTML, {headers: {"Content-Type": "text/html;charset=UTF-8"}});
-  }
-
-  switch (path[0]) {
-    case "api":
-      // This is a request for `/api/...`, call the API handler.
-      return handleApiRequest(path.slice(1), request, env);
-
-    default:
-      return new Response("Not found", {status: 404});
-  }
-}
 
 async function handleApiRequest(path, request, env) {
   // We've received at API request. Route the request based on the path.
@@ -227,39 +226,38 @@ export class ChatRoom {
   // directly from the internet. In the future, we will support other formats than HTTP for these
   // communications, but we started with HTTP for its familiarity.
   async fetch(request) {
-    return await handleErrors(request, () => this.fetchImpl(request))
-  }
-  async fetchImpl(request) {
-    let url = new URL(request.url);
+    return await handleErrors(request, async () => {
+      let url = new URL(request.url);
 
-    switch (url.pathname) {
-      case "/websocket": {
-        // The request is to `/api/room/<name>/websocket`. A client is trying to establish a new
-        // WebSocket session.
-        if (request.headers.get("Upgrade") != "websocket") {
-          return new Response("expected websocket", {status: 400});
+      switch (url.pathname) {
+        case "/websocket": {
+          // The request is to `/api/room/<name>/websocket`. A client is trying to establish a new
+          // WebSocket session.
+          if (request.headers.get("Upgrade") != "websocket") {
+            return new Response("expected websocket", {status: 400});
+          }
+
+          // Get the client's IP address for use with the rate limiter.
+          let ip = request.headers.get("CF-Connecting-IP");
+
+          // To accept the WebSocket request, we create a WebSocketPair (which is like a socketpair,
+          // i.e. two WebSockets that talk to each other), we return one end of the pair in the
+          // response, and we operate on the other end. Note that this API is not part of the
+          // Fetch API standard; unfortunately, the Fetch API / Service Workers specs do not define
+          // any way to act as a WebSocket server today.
+          let pair = new WebSocketPair();
+
+          // We're going to take pair[1] as our end, and return pair[0] to the client.
+          await this.handleSession(pair[1], ip);
+
+          // Now we return the other end of the pair to the client.
+          return new Response(null, { status: 101, webSocket: pair[0] });
         }
 
-        // Get the client's IP address for use with the rate limiter.
-        let ip = request.headers.get("CF-Connecting-IP");
-
-        // To accept the WebSocket request, we create a WebSocketPair (which is like a socketpair,
-        // i.e. two WebSockets that talk to each other), we return one end of the pair in the
-        // response, and we operate on the other end. Note that this API is not part of the
-        // Fetch API standard; unfortunately, the Fetch API / Service Workers specs do not define
-        // any way to act as a WebSocket server today.
-        let pair = new WebSocketPair();
-
-        // We're going to take pair[1] as our end, and return pair[0] to the client.
-        await this.handleSession(pair[1], ip);
-
-        // Now we return the other end of the pair to the client.
-        return new Response(null, { status: 101, webSocket: pair[0] });
+        default:
+          return new Response("Not found", {status: 404});
       }
-
-      default:
-        return new Response("Not found", {status: 404});
-    }
+    });
   }
 
   // handleSession() implements our WebSocket-based chat protocol.
@@ -450,25 +448,24 @@ export class RateLimiter {
   // Either way, the result is the number of seconds to wait before allowing the IP to perform its
   // next action.
   async fetch(request) {
-    return await handleErrors(request, () => this.fetchImpl(request))
-  }
-  async fetchImpl(request) {
-    let now = Date.now() / 1000;
+    return await handleErrors(request, async () => {
+      let now = Date.now() / 1000;
 
-    this.nextAllowedTime = Math.max(now, this.nextAllowedTime);
+      this.nextAllowedTime = Math.max(now, this.nextAllowedTime);
 
-    if (request.method == "POST") {
-      // POST request means the user performed an action.
-      // We allow one action per 5 seconds.
-      this.nextAllowedTime += 5;
-    }
+      if (request.method == "POST") {
+        // POST request means the user performed an action.
+        // We allow one action per 5 seconds.
+        this.nextAllowedTime += 5;
+      }
 
-    // Return the number of seconds that the client needs to wait.
-    //
-    // We provide a "grace" period of 20 seconds, meaning that the client can make 4-5 requests
-    // in a quick burst before they start being limited.
-    let cooldown = Math.max(0, this.nextAllowedTime - now - 20);
-    return new Response(cooldown);
+      // Return the number of seconds that the client needs to wait.
+      //
+      // We provide a "grace" period of 20 seconds, meaning that the client can make 4-5 requests
+      // in a quick burst before they start being limited.
+      let cooldown = Math.max(0, this.nextAllowedTime - now - 20);
+      return new Response(cooldown);
+    })
   }
 }
 
