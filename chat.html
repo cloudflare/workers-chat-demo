@@ -10,7 +10,7 @@
 
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <!--===================================================================================-->
 <!-- Inline style to avoid an extra round trip before the page can render. -->
 <style type="text/css">
@@ -35,7 +35,7 @@ body {
   font-weight: bold;
 }
 #spacer {
-  height: 100vh;
+  height: calc(100vh - 32px - 5em);
 }
 
 #roster {
@@ -339,6 +339,15 @@ function startChat() {
       chatInput.focus();
     }
   });
+
+  // Detect mobile keyboard appearing and disappearing, and adjust the scroll as appropriate.
+  if('visualViewport' in window) {
+    window.visualViewport.addEventListener('resize', function(event) {
+      if (isAtBottom) {
+        chatlog.scrollBy(0, 1e8);
+      }
+    });
+  }
 
   join();
 }
