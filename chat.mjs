@@ -21,15 +21,15 @@
 // writing regular Workers (without Durable Objects) too, but for now, you must be in the Durable
 // Objects beta to be able to use the new syntax, while we work out the quirks.
 //
-// To see the API for uploading module-based Workers, check out the Makefile.
+// To see the API for uploading module-based Workers, check out the publish.sh script.
 
 // ===============================
 // Required Environment
 // ===============================
 //
 // This worker, when deployed, must be configured with two environment bindings:
-// * rooms: A Durable Object class binding mapped to the ChatRoom class.
-// * limiters: A Durable Object class binding mapped to the RateLimiter class.
+// * rooms: A Durable Object namespace binding mapped to the ChatRoom class.
+// * limiters: A Durable Object namespace binding mapped to the RateLimiter class.
 //
 // Incidentally, in pre-modules Workers syntax, "bindings" (like KV bindings, secrets, etc.)
 // appeared in your script as global variables, but in the new modules syntax, this is no longer
@@ -40,7 +40,7 @@
 // call into existing code that has different environment requirements, then you need to be able
 // to pass the environment as a parameter instead.
 //
-// Once again, see the Makefile to understand how the environment is configured.
+// Once again, see the publish.sh script to understand how the environment is configured.
 
 // =======================================================================================
 // The regular Worker part...
@@ -89,7 +89,7 @@ async function handleErrors(request, func) {
 export default {
   async fetch(request, env) {
     return await handleErrors(request, async () => {
-      // We have received at HTTP request! Parse the URL and route the request.
+      // We have received an HTTP request! Parse the URL and route the request.
 
       let url = new URL(request.url);
       let path = url.pathname.slice(1).split('/');
@@ -125,8 +125,8 @@ async function handleApiRequest(path, request, env) {
           // POST to /api/room creates a private room.
           //
           // Incidentally, this code doesn't actually store anything. It just generates a valid
-          // unique ID for this class. Each durable object class has its own ID space, but IDs
-          // from one class's space are not valid for any other class.
+          // unique ID for this namespace. Each durable object namespace has its own ID space, but
+          // IDs from one namespace are not valid for any other.
           //
           // The IDs returned by `newUniqueId()` are unguessable, so are a valid way to implement
           // "anyone with the link can access" sharing. Additionally, IDs generated this way have
@@ -161,7 +161,7 @@ async function handleApiRequest(path, request, env) {
       if (name.match(/^[0-9a-f]{64}$/)) {
         // The name is 64 hex digits, so let's assume it actually just encodes an ID. We use this
         // for private rooms. `idFromString()` simply parses the text as a hex encoding of the raw
-        // ID (and verifies that this is a valid ID for this class).
+        // ID (and verifies that this is a valid ID for this namespace).
         id = env.rooms.idFromString(name);
       } else if (name.length <= 32) {
         // Treat as a string room name (limited to 32 characters). `idFromName()` consistently
@@ -273,7 +273,7 @@ export class ChatRoom {
         err => webSocket.close(1011, err.stack));
 
     // Create our session and add it to the sessions list.
-    // We don't send any messages to the client until it has send us the initial user info
+    // We don't send any messages to the client until it has sent us the initial user info
     // message. Until then, we will queue messages in `session.blockedMessages`.
     let session = {webSocket, blockedMessages: []};
     this.sessions.push(session);
