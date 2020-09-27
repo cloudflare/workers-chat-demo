@@ -176,24 +176,24 @@ p:last-of-type {
 
   </head>
   <body>
-    <div id="name-form">
+    <form id="name-form" action="/fake-form-action">
       <input id="name-input" placeholder="your name">
       <p>This chat runs entirely on the edge, powered by<br>
         <a href="https://blog.cloudflare.com/introducing-workers-durable-objects" target="_blank">Cloudflare Workers Durable Objects</a></p>
-    </div>
-    <div id="room-form">
+    </form>
+    <form id="room-form" action="/fake-form-action">
       <p>Enter a public room:</p>
       <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
       <p>OR</p>
       <button id="go-private">Create a Private Room &raquo;</button>
-    </div>
-    <div id="chatroom">
+    </form>
+    <form id="chatroom" action="/fake-form-action">
       <div id="chatlog">
         <div id="spacer"></div>
       </div>
       <div id="roster"></div>
       <input id="chat-input">
-    </div>
+    </form>
   </body>
 
 <!--===================================================================================-->
@@ -202,10 +202,13 @@ p:last-of-type {
 <script type="text/javascript">
 let currentWebSocket = null;
 
+let nameForm = document.querySelector("#name-form");
 let nameInput = document.querySelector("#name-input");
+let roomForm = document.querySelector("#room-form");
 let roomNameInput = document.querySelector("#room-name");
 let goPublicButton = document.querySelector("#go-public");
 let goPrivateButton = document.querySelector("#go-private");
+let chatroom = document.querySelector("#chatroom");
 let chatlog = document.querySelector("#chatlog");
 let chatInput = document.querySelector("#chat-input");
 let roster = document.querySelector("#roster");
@@ -216,13 +219,18 @@ let isAtBottom = true;
 let username;
 let roomname;
 
+let hostname = window.location.host;
+if (hostname == "") {
+  // Probably testing the HTML locally.
+  hostname = "edge-chat-demo.cloudflareworkers.com";
+}
+
 function startNameChooser() {
-  nameInput.addEventListener("keydown", event => {
-    if (event.keyCode == 13) {
-      username = event.currentTarget.value;
-      if (username.length > 0) {
-        startRoomChooser();
-      }
+  nameForm.addEventListener("submit", event => {
+    event.preventDefault();
+    username = nameInput.value;
+    if (username.length > 0) {
+      startRoomChooser();
     }
   });
 
@@ -236,7 +244,7 @@ function startNameChooser() {
 }
 
 function startRoomChooser() {
-  document.querySelector("#name-form").remove();
+  nameForm.remove();
 
   if (document.location.hash.length > 1) {
     roomname = document.location.hash.slice(1);
@@ -244,12 +252,11 @@ function startRoomChooser() {
     return;
   }
 
-  roomNameInput.addEventListener("keydown", event => {
-    if (event.keyCode == 13) {
-      roomname = event.currentTarget.value;
-      if (roomname.length > 0) {
-        startChat();
-      }
+  roomForm.addEventListener("submit", event => {
+    event.preventDefault();
+    roomname = roomNameInput.value;
+    if (roomname.length > 0) {
+      startChat();
     }
   });
 
@@ -271,7 +278,7 @@ function startRoomChooser() {
     goPublicButton.disabled = true;
     event.currentTarget.disabled = true;
 
-    let response = await fetch("/api/room", {method: "POST"});
+    let response = await fetch("https://" + hostname + "/api/room", {method: "POST"});
     if (!response.ok) {
       alert("something went wrong");
       document.location.reload();
@@ -286,7 +293,7 @@ function startRoomChooser() {
 }
 
 function startChat() {
-  document.querySelector("#room-form").remove();
+  roomForm.remove();
 
   // Normalize the room name a bit.
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
@@ -299,14 +306,7 @@ function startChat() {
   document.location.hash = "#" + roomname;
 
   chatInput.addEventListener("keydown", event => {
-    if (event.keyCode == 13 && currentWebSocket) {
-      // enter key (ignore if not connected)
-      currentWebSocket.send(JSON.stringify({message: event.currentTarget.value}));
-      event.currentTarget.value = "";
-
-      // Scroll to bottom whenever sending a message.
-      chatlog.scrollBy(0, 1e8);
-    } else if (event.keyCode == 38) {
+    if (event.keyCode == 38) {
       // up arrow
       chatlog.scrollBy(0, -50);
     } else if (event.keyCode == 40) {
@@ -318,6 +318,18 @@ function startChat() {
     } else if (event.keyCode == 34) {
       // page down
       chatlog.scrollBy(0, chatlog.clientHeight - 50);
+    }
+  });
+
+  chatroom.addEventListener("submit", event => {
+    event.preventDefault();
+
+    if (currentWebSocket) {
+      currentWebSocket.send(JSON.stringify({message: chatInput.value}));
+      chatInput.value = "";
+
+      // Scroll to bottom whenever sending a message.
+      chatlog.scrollBy(0, 1e8);
     }
   });
 
@@ -356,7 +368,7 @@ let lastSeenTimestamp = 0;
 let wroteWelcomeMessages = false;
 
 function join() {
-  let ws = new WebSocket("wss://edge-chat-demo.cloudflareworkers.com/api/room/" + roomname + "/websocket");
+  let ws = new WebSocket("wss://" + hostname + "/api/room/" + roomname + "/websocket");
   let rejoined = false;
   let startTime = Date.now();
 
