@@ -344,6 +344,7 @@ function startChat() {
 }
 
 let lastSeenTimestamp = 0;
+let wroteWelcomeMessages = false;
 
 function join() {
   let ws = new WebSocket("wss://edge-chat-demo.cloudflareworkers.com/api/room/" + roomname + "/websocket");
@@ -397,19 +398,22 @@ function join() {
       }
     } else if (data.ready) {
       // All pre-join messages have been delivered.
-      addChatMessage(null,
-          "* This is a demo app built with Cloudflare Workers Durable Objects. The source code " +
-          "can be found at: https://github.com/cloudflare/workers-chat-demo");
-      addChatMessage(null,
-          "* WARNING: Participants in this chat are random people on the internet. " +
-          "Names are not authenticated; anyone can pretend to be anyone. The people " +
-          "you are chatting with are NOT Cloudflare employees. Chat history is saved.");
-      if (roomname.length == 64) {
+      if (!wroteWelcomeMessages) {
+        wroteWelcomeMessages = true;
         addChatMessage(null,
-            "* This is a private room. You can invite someone to the room by sending them the URL.");
-      } else {
+            "* This is a demo app built with Cloudflare Workers Durable Objects. The source code " +
+            "can be found at: https://github.com/cloudflare/workers-chat-demo");
         addChatMessage(null,
-            "* Welcome to #" + roomname + ". Say hi!");
+            "* WARNING: Participants in this chat are random people on the internet. " +
+            "Names are not authenticated; anyone can pretend to be anyone. The people " +
+            "you are chatting with are NOT Cloudflare employees. Chat history is saved.");
+        if (roomname.length == 64) {
+          addChatMessage(null,
+              "* This is a private room. You can invite someone to the room by sending them the URL.");
+        } else {
+          addChatMessage(null,
+              "* Welcome to #" + roomname + ". Say hi!");
+        }
       }
     } else {
       // A regular chat message.
@@ -421,13 +425,11 @@ function join() {
   });
 
   ws.addEventListener("close", event => {
-    addChatMessage(null, "* Notice: WebSocket closed. Reconnecting...");
-    console.log("WebSocket closed:", event.code, event.reason);
+    console.log("WebSocket closed, reconnecting:", event.code, event.reason);
     rejoin();
   });
   ws.addEventListener("error", event => {
-    addChatMessage(null, "* Notice: WebSocket errored. Reconnecting...");
-    console.log("WebSocket error:", event);
+    console.log("WebSocket error, reconnecting:", event);
     rejoin();
   });
 }
