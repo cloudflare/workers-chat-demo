@@ -5,7 +5,7 @@
 # This is a temporary hack needed until we add Durable Objects support to Wrangler. Once Wrangler
 # support exists, this script can probably go away.
 #
-# On first run, this script will ask for configuration, create the Durable Object classes bindings,
+# On first run, this script will ask for configuration, create the Durable Object namespace bindings,
 # and generate metadata.json. On subsequent runs it will just update the script from source code.
 
 set -euo pipefail
@@ -58,12 +58,12 @@ curl_api() {
   fi
 }
 
-# Let's verify the credentials work by listing Workers scripts and Durable Object classes. If
+# Let's verify the credentials work by listing Workers scripts and Durable Object namespaces. If
 # either of these requests error then we're certainly not going to be able to continue.
 echo "Checking if credentials can access Workers..."
 curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts >/dev/null
 echo "Checking if credentials can access Durable Objects..."
-curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/durable_objects/classes >/dev/null
+curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/durable_objects/namespaces >/dev/null
 echo "Credentials OK! Publishing..."
 
 # upload_script uploads our Worker code with the appropriate metadata.
@@ -76,11 +76,11 @@ upload_script() {
 }
 
 # upload_bootstrap_script is a temporary hack to work around a chicken-and-egg problem: in order
-# to define a Durable Object class, we must tell it a script and class name. But when we upload our
-# script, we need to configure the environment to bind to our durable object classes. This function
-# uploads a version of our script with an empty environment (no bindings). The script won't be able
-# to run correctly, but this gets us far enough to define the classes, and then we can upload the
-# script with full environment later.
+# to define a Durable Object namespace, we must tell it a script and class name. But when we upload
+# our script, we need to configure the environment to bind to our durable object namespaces. This
+# function uploads a version of our script with an empty environment (no bindings). The script won't
+# be able to run correctly, but this gets us far enough to define the namespaces, and then we can
+# upload the script with full environment later.
 #
 # This is obviously dumb and we (Cloudflare) will come up with something better soon.
 upload_bootstrap_script() {
@@ -93,16 +93,16 @@ upload_bootstrap_script() {
   rm bootstrap-metadata.json
 }
 
-# upsert_class configures a Durable Object class so that instances of it can be created and called
-# from other scripts (or from the same script). This function checks if the class already exists,
-# creates it if it doesn't, and either way writes the class ID to stdout.
+# upsert_namespace configures a Durable Object namespace so that instances of it can be created
+# and called from other scripts (or from the same script). This function checks if the namespace
+# already exists, creates it if it doesn't, and either way writes the namespace ID to stdout.
 #
-# The class ID can be used to configure environment bindings in other scripts (or even the same
-# script) such that they can send messages to instances of this class.
-upsert_class() {
-  # Check if the class exists already.
+# The namespace ID can be used to configure environment bindings in other scripts (or even the same
+# script) such that they can send messages to instances of this namespace.
+upsert_namespace() {
+  # Check if the namespace exists already.
   EXISTING_ID=$(\
-      curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/durable_objects/classes | \
+      curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/durable_objects/namespaces | \
       jq -r ".[] | select(.script == \"$SCRIPT_NAME\" and .class == \"$1\") | .id")
 
   if [ "$EXISTING_ID" != "" ]; then
@@ -111,32 +111,32 @@ upsert_class() {
   fi
 
   # No. Create it.
-  curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/durable_objects/classes \
+  curl_api https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/durable_objects/namespaces \
       -X POST --data "{\"name\": \"$SCRIPT_NAME-$1\", \"script\": \"$SCRIPT_NAME\", \"class\": \"$1\"}" | \
       jq -r .id
 }
 
 if [ ! -e metadata.json ]; then
   # If metadata.json doesn't exist we assume this is first-time setup and we need to create the
-  # classes.
+  # namespaces.
 
   upload_bootstrap_script
-  ROOMS_ID=$(upsert_class ChatRoom)
-  LIMITERS_ID=$(upsert_class RateLimiter)
+  ROOMS_ID=$(upsert_namespace ChatRoom)
+  LIMITERS_ID=$(upsert_namespace RateLimiter)
 
   cat > metadata.json << __EOF__
 {
   "main_module": "chat.mjs",
   "bindings": [
     {
-      "type": "durable_object_class",
+      "type": "durable_object_namespace",
       "name": "rooms",
-      "class_id": "$ROOMS_ID"
+      "namespace_id": "$ROOMS_ID"
     },
     {
-      "type": "durable_object_class",
+      "type": "durable_object_namespace",
       "name": "limiters",
-      "class_id": "$LIMITERS_ID"
+      "namespace_id": "$LIMITERS_ID"
     }
   ]
 }
