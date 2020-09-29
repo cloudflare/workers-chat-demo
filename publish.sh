@@ -24,8 +24,8 @@ fi
 if [ -e credentials.conf ]; then
   source credentials.conf
 else
-  echo -n "Please create a Cloudflare Auth Token with the 'Edit Cloudflare Workers' template."
-  echo -n "Auth Token: "
+  echo "Please create a Cloudflare API Token with Workers Scripts Edit permission on your account (can be created using the Edit Cloudflare Workers API Token template)."
+  echo -n "API Token: "
   read AUTH_TOKEN
   echo -n "Cloudflare account ID (32 hex digits, found on the right sidebar of the Workers dashboard): "
   read ACCOUNT_ID
