@@ -483,7 +483,7 @@ class RateLimiterClient {
     this.getLimiterStub = getLimiterStub;
     this.reportError = reportError;
 
-    // Call the callbacak to get the initial stub.
+    // Call the callback to get the initial stub.
     this.limiter = getLimiterStub();
 
     // When `inCooldown` is true, the rate limit is currently applied and checkLimit() will return
