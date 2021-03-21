@@ -23,14 +23,18 @@ For more details, take a look at the code! It is well-commented.
 
 ## Deploy it yourself
 
-If you are in the Durable Objects beta, you can deploy the app by running:
+If you are in the Durable Objects beta, you can deploy this demo using [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler), the official Workers CLI. At the time of writing, Durable Object support in Wrangler is not yet available in a full release build, so you need to install a release candidate instead. See the [release notes](https://github.com/cloudflare/wrangler/releases/tag/v1.15.0-custom-builds-rc.1) for installation instructions and more information.
 
-    ./publish.sh
+After installing it, run `wrangler login` to [connect it to your Cloudflare account](https://developers.cloudflare.com/workers/cli-wrangler/authentication).
 
-This script will prompt you for necessary credentials and deploy the app to your account under the name `edge-chat-demo`.
+Once you have Wrangler installed and authenticated, you can deploy the app for the first time by adding your Cloudflare account ID (which can be viewed by running `wrangler whoami`) to the wrangler.toml file and then running:
+
+    wrangler publish --new-class ChatRoom --new-class RateLimiter
+
+If you get an error about the `--new-class` flag not being recognized, you need to update your version of Wrangler.
+
+This command will deploy the app to your account under the name `edge-chat-demo`. The `--new-class` flags tell Cloudflare that you want the `ChatRoom` and `RateLimiter` classes to be callable as Durable Objects. The flags should be omitted on subsequent uploads of the same Worker because at that point the classes are already configured as Durable Objects.
 
 ## What are the dependencies?
 
-This demo code does not have any dependencies, aside from Cloudflare Workers (for the server side, `chat.mjs`) and a modern web browser (for the client side, `chat.html`).
-
-The upload script, `publish.sh`, needs `bash`, `curl`, and `jq`. That script will go away as soon as we add Durable Objects support to [Wrangler](https://github.com/cloudflare/wrangler), the official Workers CLI.
+This demo code does not have any dependencies, aside from Cloudflare Workers (for the server side, `chat.mjs`) and a modern web browser (for the client side, `chat.html`). Deploying the code requires Wrangler.
