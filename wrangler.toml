@@ -1,0 +1,15 @@
+name = "edge-chat-demo"
+type = "javascript"
+workers_dev = true
+# Add your account ID here
+account_id = ""
+
+[build]
+upload_dir = "src"
+upload_format = "modules"
+
+[durable_objects]
+classes = [
+  { binding = "rooms", class_name = "ChatRoom" },
+  { binding = "limiters", class_name = "RateLimiter" }
+]
