@@ -21,7 +21,11 @@
 // writing regular Workers (without Durable Objects) too, but for now, you must be in the Durable
 // Objects beta to be able to use the new syntax, while we work out the quirks.
 //
-// To see the API for uploading module-based Workers, check out the publish.sh script.
+// To see an example configuration for uploading module-based Workers, check out the wrangler.toml
+// file or one of our Durable Object templates for Wrangler:
+//   * https://github.com/cloudflare/durable-objects-template
+//   * https://github.com/cloudflare/durable-objects-rollup-esm
+//   * https://github.com/cloudflare/durable-objects-webpack-commonjs
 
 // ===============================
 // Required Environment
@@ -40,7 +44,7 @@
 // call into existing code that has different environment requirements, then you need to be able
 // to pass the environment as a parameter instead.
 //
-// Once again, see the publish.sh script to understand how the environment is configured.
+// Once again, see the wrangler.toml file to understand how the environment is configured.
 
 // =======================================================================================
 // The regular Worker part...
