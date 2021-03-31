@@ -9,7 +9,7 @@ upload_dir = "src"
 upload_format = "modules"
 
 [durable_objects]
-classes = [
-  { binding = "rooms", class_name = "ChatRoom" },
-  { binding = "limiters", class_name = "RateLimiter" }
+bindings = [
+  { name = "rooms", class_name = "ChatRoom" },
+  { name = "limiters", class_name = "RateLimiter" }
 ]

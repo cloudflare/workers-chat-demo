@@ -23,11 +23,13 @@ For more details, take a look at the code! It is well-commented.
 
 ## Deploy it yourself
 
-If you are in the Durable Objects beta, you can deploy this demo using [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler), the official Workers CLI. At the time of writing, Durable Object support in Wrangler is not yet available in a full release build, so you need to install a release candidate instead. See the [release notes](https://github.com/cloudflare/wrangler/releases/tag/v1.15.0-custom-builds-rc.1) for installation instructions and more information.
+If you haven't already, join the Durable Objects beta by visiting the [Cloudflare dashboard](https://dash.cloudflare.com/) and navigating to "Workers" and then "Durable Objects".
+
+Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler), the official Workers CLI, installed. At the time of writing, Durable Object support in Wrangler is not yet available in a full release build, so you need to install a release candidate instead. See the [release notes](https://github.com/cloudflare/wrangler/releases/tag/v1.15.0-custom-builds-rc.2) for installation instructions and more information.
 
 After installing it, run `wrangler login` to [connect it to your Cloudflare account](https://developers.cloudflare.com/workers/cli-wrangler/authentication).
 
-Once you have Wrangler installed and authenticated, you can deploy the app for the first time by adding your Cloudflare account ID (which can be viewed by running `wrangler whoami`) to the wrangler.toml file and then running:
+Once you're in the Durable Objects beta and have Wrangler installed and authenticated, you can deploy the app for the first time by adding your Cloudflare account ID (which can be viewed by running `wrangler whoami`) to the wrangler.toml file and then running:
 
     wrangler publish --new-class ChatRoom --new-class RateLimiter
 
