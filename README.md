@@ -23,7 +23,7 @@ For more details, take a look at the code! It is well-commented.
 
 ## Deploy it yourself
 
-If you are in the Durable Objects beta, you can deploy this demo using [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler), the official Workers CLI. At the time of writing, Durable Object support in Wrangler is not yet available in a full release build, so you need to install a release candidate instead. See the [release notes](https://github.com/cloudflare/wrangler/releases/tag/v1.15.0-custom-builds-rc.1) for installation instructions and more information.
+If you are in the Durable Objects beta, you can deploy this demo using [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler), the official Workers CLI. At the time of writing, Durable Object support in Wrangler is not yet available in a full release build, so you need to install a release candidate instead. See the [release notes](https://github.com/cloudflare/wrangler/releases/tag/v1.15.0-custom-builds-rc.2) for installation instructions and more information.
 
 After installing it, run `wrangler login` to [connect it to your Cloudflare account](https://developers.cloudflare.com/workers/cli-wrangler/authentication).
 
