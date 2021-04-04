@@ -54,7 +54,7 @@
 
 // With the introduction of modules, we're experimenting with allowing text/data blobs to be
 // uploaded and exposed as synthetic modules. By suffixing `chat.html.bin` with ".bin", Wrangler
-// knows to interpet the file as a module of type `application/octet-stream`, i.e. just a byte blob.
+// knows to interpret the file as a module of type `application/octet-stream`, i.e. just a byte blob.
 // So when we import it as `HTML` here, we get the HTML content as an `ArrayBuffer`. So, we can
 // serve our app's static asset without relying on any separate storage. (However, the space
 // available for assets served this way is very limited; larger sites should continue to use Workers
