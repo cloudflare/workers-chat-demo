@@ -4,9 +4,11 @@ workers_dev = true
 # Add your account ID here
 account_id = ""
 
-[build]
-upload_dir = "src"
-upload_format = "modules"
+[build.upload]
+format = "modules"
+dir = "src"
+main = "./chat.mjs"
+rules = [{type = "Data", globs = ["**/*.html"]}]
 
 [durable_objects]
 bindings = [
