@@ -53,13 +53,13 @@
 // clients. This part is stateless.
 
 // With the introduction of modules, we're experimenting with allowing text/data blobs to be
-// uploaded and exposed as synthetic modules. By suffixing `chat.html.bin` with ".bin", Wrangler
-// knows to interpret the file as a module of type `application/octet-stream`, i.e. just a byte blob.
-// So when we import it as `HTML` here, we get the HTML content as an `ArrayBuffer`. So, we can
+// uploaded and exposed as synthetic modules. In wrangler.toml we specify a rule that files ending
+// in .html should be uploaded as "Data", equivalent to content-type `application/octet-stream`.
+// So when we import it as `HTML` here, we get the HTML content as an `ArrayBuffer`. This lets us
 // serve our app's static asset without relying on any separate storage. (However, the space
 // available for assets served this way is very limited; larger sites should continue to use Workers
 // KV to serve assets.)
-import HTML from "chat.html.bin";
+import HTML from "chat.html";
 
 // `handleErrors()` is a little utility function that can wrap an HTTP request handler in a
 // try/catch and return errors to the client. You probably wouldn't want to use this in production
