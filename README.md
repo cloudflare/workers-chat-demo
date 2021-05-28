@@ -25,7 +25,7 @@ For more details, take a look at the code! It is well-commented.
 
 If you haven't already, join the Durable Objects beta by visiting the [Cloudflare dashboard](https://dash.cloudflare.com/) and navigating to "Workers" and then "Durable Objects".
 
-Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler), the official Workers CLI, installed. At the time of writing, Durable Object support in Wrangler is not yet available in a full release build, so you need to install a release candidate instead. See the [release notes](https://github.com/cloudflare/wrangler/releases/tag/v1.16.0-durable-objects-rc.0) for installation instructions and more information.
+Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update), the official Workers CLI, installed. Version 1.17 or newer is required for Durable Objects support.
 
 After installing it, run `wrangler login` to [connect it to your Cloudflare account](https://developers.cloudflare.com/workers/cli-wrangler/authentication).
 
