@@ -1,6 +1,7 @@
 name = "edge-chat-demo"
 type = "javascript"
 workers_dev = true
+compatibility_date = "2021-11-08"
 # Add your account ID here
 account_id = ""
 
