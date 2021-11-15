@@ -25,17 +25,17 @@ For more details, take a look at the code! It is well-commented.
 
 If you haven't already, join the Durable Objects beta by visiting the [Cloudflare dashboard](https://dash.cloudflare.com/) and navigating to "Workers" and then "Durable Objects".
 
-Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update), the official Workers CLI, installed. Version 1.17 or newer is required for Durable Objects support.
+Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update), the official Workers CLI, installed. Version 1.19.3 or newer is required to publish this example as written.
 
 After installing it, run `wrangler login` to [connect it to your Cloudflare account](https://developers.cloudflare.com/workers/cli-wrangler/authentication).
 
 Once you're in the Durable Objects beta and have Wrangler installed and authenticated, you can deploy the app for the first time by adding your Cloudflare account ID (which can be viewed by running `wrangler whoami`) to the wrangler.toml file and then running:
 
-    wrangler publish --new-class ChatRoom --new-class RateLimiter
+    wrangler publish
 
-If you get an error about the `--new-class` flag not being recognized, you need to update your version of Wrangler.
+If you get an error saying "Cannot create binding for class [...] because it is not currently configured to implement durable objects", you need to update your version of Wrangler.
 
-This command will deploy the app to your account under the name `edge-chat-demo`. The `--new-class` flags tell Cloudflare that you want the `ChatRoom` and `RateLimiter` classes to be callable as Durable Objects. The flags should be omitted on subsequent uploads of the same Worker because at that point the classes are already configured as Durable Objects.
+This command will deploy the app to your account under the name `edge-chat-demo`.
 
 ## What are the dependencies?
 
