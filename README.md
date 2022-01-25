@@ -60,4 +60,4 @@ tag = "v2"
 deleted_classes = ["ChatRoom", "RateLimiter"]
 ```
 
-Then run `wrangler publish`, which will delete the Durable Objects.  To remove the Worker, go to [dash.cloudflare.com](dash.cloudflare.com) and navigate to Workers -> Overview -> edge-chat-demo -> Manage Service -> Delete (bottom of page)
+Then run `wrangler publish`, which will delete the Durable Objects and all data stored in them.  To remove the Worker, go to [dash.cloudflare.com](dash.cloudflare.com) and navigate to Workers -> Overview -> edge-chat-demo -> Manage Service -> Delete (bottom of page)
