@@ -40,3 +40,24 @@ This command will deploy the app to your account under the name `edge-chat-demo`
 ## What are the dependencies?
 
 This demo code does not have any dependencies, aside from Cloudflare Workers (for the server side, `chat.mjs`) and a modern web browser (for the client side, `chat.html`). Deploying the code requires Wrangler.
+
+## How to uninstall
+
+Modify wrangler.toml to remove the durable_objects bindings and add a deleted_classes migration. The bottom of your wrangler.toml should look like:
+
+```
+[durable_objects]
+bindings = [
+]
+
+# Indicate that you want the ChatRoom and RateLimiter classes to be callable as Durable Objects.
+[[migrations]]
+tag = "v1" # Should be unique for each entry
+new_classes = ["ChatRoom", "RateLimiter"]
+
+[[migrations]]
+tag = "v2"
+deleted_classes = ["ChatRoom", "RateLimiter"]
+```
+
+Then run `wrangler publish`, which will delete the Durable Objects.  To remove the Worker, go to [dash.cloudflare.com](dash.cloudflare.com) and navigate to Workers -> Overview -> edge-chat-demo -> Manage Service -> Delete (bottom of page)
