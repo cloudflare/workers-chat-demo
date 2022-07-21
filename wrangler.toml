@@ -1,21 +1,21 @@
 name = "edge-chat-demo"
-type = "javascript"
 workers_dev = true
 compatibility_date = "2021-11-08"
 # Add your account ID here
 account_id = ""
 
-[build.upload]
-format = "modules"
-dir = "src"
-main = "./chat.mjs"
-rules = [{type = "Data", globs = ["**/*.html"]}]
+main = "src/chat.mjs"
 
 [durable_objects]
 bindings = [
   { name = "rooms", class_name = "ChatRoom" },
   { name = "limiters", class_name = "RateLimiter" }
 ]
+
+[[rules]]
+type = "Data"
+globs = ["**/*.html"]
+fallthrough = false
 
 # Indicate that you want the ChatRoom and RateLimiter classes to be callable as Durable Objects.
 [[migrations]]
