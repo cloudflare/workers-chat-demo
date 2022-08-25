@@ -368,7 +368,9 @@ let lastSeenTimestamp = 0;
 let wroteWelcomeMessages = false;
 
 function join() {
-  let ws = new WebSocket("wss://" + hostname + "/api/room/" + roomname + "/websocket");
+  // If we are running via wrangler dev, use ws:
+  const wss = document.location.protocol === "http:" ? "ws://" : "wss://";
+  let ws = new WebSocket(wss + hostname + "/api/room/" + roomname + "/websocket");
   let rejoined = false;
   let startTime = Date.now();
 
