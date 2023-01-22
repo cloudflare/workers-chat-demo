@@ -18,8 +18,8 @@ For more details, take a look at the code! It is well-commented.
 
 ## Learn More
 
-* [Durable Objects introductory blog post](https://blog.cloudflare.com/introducing-workers-durable-objects)
-* [Durable Objects documentation](https://developers.cloudflare.com/workers/learning/using-durable-objects)
+- [Durable Objects introductory blog post](https://blog.cloudflare.com/introducing-workers-durable-objects)
+- [Durable Objects documentation](https://developers.cloudflare.com/workers/learning/using-durable-objects)
 
 ## Deploy it yourself
 
@@ -29,9 +29,11 @@ Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cl
 
 After installing it, run `wrangler login` to [connect it to your Cloudflare account](https://developers.cloudflare.com/workers/cli-wrangler/authentication).
 
-Once you're in the Durable Objects beta and have Wrangler installed and authenticated, you can deploy the app for the first time by adding your Cloudflare account ID (which can be viewed by running `wrangler whoami`) to the wrangler.toml file and then running:
+Once you're in the Durable Objects beta and have Wrangler installed and authenticated, you can deploy the app for the first time by adding your Cloudflare account ID (which can be viewed by running `wrangler whoami`) to the `wrangler.toml` file and then running:
 
-    wrangler publish
+```
+wrangler publish
+```
 
 If you get an error saying "Cannot create binding for class [...] because it is not currently configured to implement durable objects", you need to update your version of Wrangler.
 
@@ -39,13 +41,13 @@ This command will deploy the app to your account under the name `edge-chat-demo`
 
 ## What are the dependencies?
 
-This demo code does not have any dependencies, aside from Cloudflare Workers (for the server side, `chat.mjs`) and a modern web browser (for the client side, `chat.html`). Deploying the code requires Wrangler.
+This demo code does not have any dependencies, aside from Cloudflare Workers (for the server side, `chat.ts`) and a modern web browser (for the client side, `chat.html`). Deploying the code requires Wrangler.
 
 ## How to uninstall
 
-Modify wrangler.toml to remove the durable_objects bindings and add a deleted_classes migration. The bottom of your wrangler.toml should look like:
+Modify `wrangler.toml` to remove the durable_objects bindings and add a deleted_classes migration. The bottom of your `wrangler.toml` should look like:
 
-```
+```toml
 [durable_objects]
 bindings = [
 ]
@@ -60,4 +62,4 @@ tag = "v2"
 deleted_classes = ["ChatRoom", "RateLimiter"]
 ```
 
-Then run `wrangler publish`, which will delete the Durable Objects and all data stored in them.  To remove the Worker, go to [dash.cloudflare.com](dash.cloudflare.com) and navigate to Workers -> Overview -> edge-chat-demo -> Manage Service -> Delete (bottom of page)
+Then run `wrangler publish`, which will delete the Durable Objects and all data stored in them. To remove the Worker, go to [dash.cloudflare.com](dash.cloudflare.com) and navigate to Workers -> Overview -> edge-chat-demo -> Manage Service -> Delete (bottom of page)
