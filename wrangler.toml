@@ -4,12 +4,12 @@ compatibility_date = "2021-11-08"
 # Add your account ID here
 account_id = ""
 
-main = "src/chat.mjs"
+main = "src/chat.ts"
 
 [durable_objects]
 bindings = [
   { name = "rooms", class_name = "ChatRoom" },
-  { name = "limiters", class_name = "RateLimiter" }
+  { name = "limiters", class_name = "RateLimiter" },
 ]
 
 [[rules]]
@@ -19,5 +19,6 @@ fallthrough = false
 
 # Indicate that you want the ChatRoom and RateLimiter classes to be callable as Durable Objects.
 [[migrations]]
-tag = "v1" # Should be unique for each entry
+# Should be unique for each entry
+tag = "v1"
 new_classes = ["ChatRoom", "RateLimiter"]
