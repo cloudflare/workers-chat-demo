@@ -1,0 +1,4 @@
+/.yarn/
+/node_modules/
+/metadata.json
+/worker-configuration.d.ts
