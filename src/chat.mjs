@@ -223,11 +223,15 @@ export class ChatRoom {
       // The constructor may have been called when waking up from hibernation,
       // so get previously serialized metadata for any existing WebSockets.
       let meta = webSocket.deserializeAttachment();
+
       // Set up our rate limiter client.
-      // It can't have been in the attachment, because structured clone doesn't work on functions.
+      // The client itself can't have been in the attachment, because structured clone doesn't work on functions.
+      // DO ids aren't cloneable, restore the ID from its hex string
+      let limiterId = this.env.limiters.idFromString(meta.limiterId);
       let limiter = new RateLimiterClient(
-        () => this.env.limiters.get(meta.limiterId),
+        () => this.env.limiters.get(limiterId),
         err => webSocket.close(1011, err.stack));
+
       // We don't send any messages to the client until it has sent us the initial user info
       // message. Until then, we will queue messages in `session.blockedMessages`.
       // This could have been arbitrarily large, so we won't put it in the attachment.
@@ -296,7 +300,7 @@ export class ChatRoom {
     // Create our session and add it to the sessions map.
     let session = { limiterId, limiter, blockedMessages: [] };
     // attach limiterId to the webSocket so it survives hibernation
-    webSocket.serializeAttachment({ ...webSocket.deserializeAttachment(), limiterId });
+    webSocket.serializeAttachment({ ...webSocket.deserializeAttachment(), limiterId: limiterId.toString() });
     this.sessions.set(webSocket, session);
 
     // Queue "join" messages for all online users, to populate the client's roster.
