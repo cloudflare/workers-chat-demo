@@ -320,21 +320,6 @@ export class ChatRoom {
     });
   }
 
-  // On "close" and "error" events, remove the WebSocket from the sessions list and broadcast
-  // a quit message.
-  async webSocketClose(webSocket, code, reason, wasClean) {
-    session = this.sessions.get(webSocket);
-    session.quit = true;
-    this.sessions.delete(webSocket);
-    if (session.name) {
-      this.broadcast({quit: session.name});
-    }
-  }
-
-  async webSocketError(webSocket, error) {
-    this.webSocketClose(webSocket)
-  }
-
   async webSocketMessage(webSocket, msg) {
     try {
       let session = this.sessions.get(webSocket);
@@ -415,6 +400,21 @@ export class ChatRoom {
       // probably isn't what you'd want to do in production, but it's convenient when testing.
       webSocket.send(JSON.stringify({error: err.stack}));
     }
+  }
+
+  // On "close" and "error" events, remove the WebSocket from the sessions list and broadcast
+  // a quit message.
+  async webSocketClose(webSocket, code, reason, wasClean) {
+    session = this.sessions.get(webSocket);
+    session.quit = true;
+    this.sessions.delete(webSocket);
+    if (session.name) {
+      this.broadcast({quit: session.name});
+    }
+  }
+
+  async webSocketError(webSocket, error) {
+    this.webSocketClose(webSocket)
   }
 
   // broadcast() broadcasts a message to all clients.
