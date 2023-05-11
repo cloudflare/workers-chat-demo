@@ -236,7 +236,7 @@ export class ChatRoom {
       // message. Until then, we will queue messages in `session.blockedMessages`.
       // This could have been arbitrarily large, so we won't put it in the attachment.
       let blockedMessages = [];
-      sessions.set(webSocket, { ...meta, limiter, blockedMessages });
+      this.sessions.set(webSocket, { ...meta, limiter, blockedMessages });
     });
 
     // We keep track of the last-seen message's timestamp just so that we can assign monotonically
@@ -304,11 +304,11 @@ export class ChatRoom {
     this.sessions.set(webSocket, session);
 
     // Queue "join" messages for all online users, to populate the client's roster.
-    this.sessions.values().forEach(otherSession => {
+    for (let otherSession of this.sessions.values()) {
       if (otherSession.name) {
         session.blockedMessages.push(JSON.stringify({joined: otherSession.name}));
       }
-    });
+    }
 
     // Load the last 100 messages from the chat history stored on disk, and send them to the
     // client.
@@ -342,7 +342,7 @@ export class ChatRoom {
       }
 
       // I guess we'll use JSON.
-      let data = JSON.parse(msg.data);
+      let data = JSON.parse(msg);
 
       if (!session.name) {
         // The first message the client sends is the user info message with their name. Save it
@@ -435,7 +435,7 @@ export class ChatRoom {
           // everyone below.
           session.quit = true;
           quitters.push(session);
-          sessions.delete(webSocket);
+          this.sessions.delete(webSocket);
         }
       } else {
         // This session hasn't sent the initial user info message yet, so we're not sending them
