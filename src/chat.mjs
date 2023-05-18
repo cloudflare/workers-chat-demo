@@ -404,8 +404,8 @@ export class ChatRoom {
 
   // On "close" and "error" events, remove the WebSocket from the sessions list and broadcast
   // a quit message.
-  async webSocketClose(webSocket, code, reason, wasClean) {
-    session = this.sessions.get(webSocket);
+  async closeOrErrorHandler(webSocket) {
+    let session = this.sessions.get(webSocket) || {};
     session.quit = true;
     this.sessions.delete(webSocket);
     if (session.name) {
@@ -413,8 +413,12 @@ export class ChatRoom {
     }
   }
 
+  async webSocketClose(webSocket, code, reason, wasClean) {
+    this.closeOrErrorHandler(webSocket)
+  }
+
   async webSocketError(webSocket, error) {
-    this.webSocketClose(webSocket)
+    this.closeOrErrorHandler(webSocket)
   }
 
   // broadcast() broadcasts a message to all clients.
