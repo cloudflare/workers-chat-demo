@@ -259,6 +259,13 @@ export class ChatRoom {
           return new Response(null, { status: 101, webSocket: pair[0] });
         }
 
+        case '/broadcast': {
+          const { message, name } = await request.json();
+          await this.addMessage(message, name);
+          const data = JSON.stringify({data: 'ok'});
+          return new Response(data, { status: 200 });
+        }
+
         default:
           return new Response("Not found", {status: 404});
       }
@@ -395,6 +402,20 @@ export class ChatRoom {
     };
     webSocket.addEventListener("close", closeOrErrorHandler);
     webSocket.addEventListener("error", closeOrErrorHandler);
+  }
+
+  async addMessage(message, name) {
+    const data = { name: name, message: message };
+    // them sequential timestamps, so at least the ordering is maintained.
+    data.timestamp = Date.now();
+
+    // Broadcast the message to all other WebSockets.
+    let dataStr = JSON.stringify(data);
+    this.broadcast(dataStr);
+
+    // Save message.
+    let key = new Date(data.timestamp).toISOString();
+    await this.storage.put(key, dataStr);
   }
 
   // broadcast() broadcasts a message to all clients.
