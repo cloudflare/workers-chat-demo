@@ -1,8 +1,5 @@
 name = "edge-chat-demo"
-workers_dev = true
-compatibility_date = "2021-11-08"
-# Add your account ID here
-account_id = ""
+compatibility_date = "2024-01-01"
 
 main = "src/chat.mjs"
 
