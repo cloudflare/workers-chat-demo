@@ -16,22 +16,31 @@ This chat app is only a few hundred lines of code. The deployment configuration 
 
 For more details, take a look at the code! It is well-commented.
 
+## Updates
+
+This example was original written using the [WebSocket API](https://developers.cloudflare.com/workers/runtime-apis/websockets/), but has since been [modified](https://github.com/cloudflare/workers-chat-demo/pull/32) to use the [WebSocket Hibernation API](https://developers.cloudflare.com/durable-objects/api/websockets/#websocket-hibernation), which is exclusive to Durable Objects.
+
+Prior to switching to the Hibernation API, WebSockets connected to a chatroom would keep the Durable Object pinned to memory even if they were just idling. This meant that a Durable Object with an open WebSocket connection would incur duration charges so long as the WebSocket connection stayed open. By switching to the WebSocket Hibernation API, the Workers Runtime will evict inactive Durable Object instances from memory, but still retain all WebSocket connections to the Durable Object. When the WebSockets become active again, the runtime will recreate the Durable Object and deliver events to the appropriate WebSocket event handler.
+
+Switching to the WebSocket Hibernation API reduces duration billing from the lifetime of the WebSocket connection to the amount of time when Javascript is actively executing.
+
 ## Learn More
 
 * [Durable Objects introductory blog post](https://blog.cloudflare.com/introducing-workers-durable-objects)
 * [Durable Objects documentation](https://developers.cloudflare.com/workers/learning/using-durable-objects)
+* [Durable Object WebSocket documentation](https://developers.cloudflare.com/durable-objects/reference/websockets/)
 
 ## Deploy it yourself
 
-If you haven't already, join the Durable Objects beta by visiting the [Cloudflare dashboard](https://dash.cloudflare.com/) and navigating to "Workers" and then "Durable Objects".
+If you haven't already, enable Durable Objects by visiting the [Cloudflare dashboard](https://dash.cloudflare.com/) and navigating to "Workers" and then "Durable Objects".
 
-Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update), the official Workers CLI, installed. Version 1.19.3 or newer is required to publish this example as written.
+Then, make sure you have [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update), the official Workers CLI, installed. Version 3.30.1 or newer is recommended for running this example.
 
 After installing it, run `wrangler login` to [connect it to your Cloudflare account](https://developers.cloudflare.com/workers/cli-wrangler/authentication).
 
-Once you're in the Durable Objects beta and have Wrangler installed and authenticated, you can deploy the app for the first time by adding your Cloudflare account ID (which can be viewed by running `wrangler whoami`) to the wrangler.toml file and then running:
+Once you've enabled Durable Objects on your account and have Wrangler installed and authenticated, you can deploy the app for the first time by running:
 
-    wrangler publish
+    wrangler deploy
 
 If you get an error saying "Cannot create binding for class [...] because it is not currently configured to implement durable objects", you need to update your version of Wrangler.
 
@@ -60,4 +69,4 @@ tag = "v2"
 deleted_classes = ["ChatRoom", "RateLimiter"]
 ```
 
-Then run `wrangler publish`, which will delete the Durable Objects and all data stored in them.  To remove the Worker, go to [dash.cloudflare.com](dash.cloudflare.com) and navigate to Workers -> Overview -> edge-chat-demo -> Manage Service -> Delete (bottom of page)
+Then run `wrangler deploy`, which will delete the Durable Objects and all data stored in them.  To remove the Worker, go to [dash.cloudflare.com](dash.cloudflare.com) and navigate to Workers -> Overview -> edge-chat-demo -> Manage Service -> Delete (bottom of page)
