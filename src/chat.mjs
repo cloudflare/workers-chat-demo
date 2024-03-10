@@ -334,7 +334,7 @@ export class ChatRoom {
       }
 
       // Check if the user is over their rate limit and reject the message if so.
-      if (!await session.limiter.checkLimit()) {
+      if (!(await session.limiter.checkLimit())) {
         webSocket.send(JSON.stringify({
           error: "Your IP is being rate-limited, please try again later."
         }));
