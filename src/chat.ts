@@ -556,12 +556,12 @@ class RateLimiterClient {
 
   // Call checkLimit() when a message is received to decide if it should be blocked due to the
   // rate limit. Returns `true` if the message should be accepted, `false` to reject.
-  async checkLimit() {
+  checkLimit() {
     if (this.inCooldown) {
       return false;
     }
     this.inCooldown = true;
-    await this.callLimiter();
+    this.callLimiter();
     return true;
   }
 
